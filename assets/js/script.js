@@ -40,9 +40,21 @@ function getProductImage(item) {
     if (imageCache[key] !== undefined) return imageCache[key];
     if (item.imagen && item.imagen.trim() !== '' && item.imagen !== 'null' && item.imagen !== 'undefined') {
         var url = item.imagen.trim();
-        if (url.indexOf('http://') === 0) {
+        
+        // Si es una ruta relativa (ej: assets/img/84.png), convertir a URL absoluta
+        if (url.indexOf('http://') !== 0 && url.indexOf('https://') !== 0 && url.indexOf('//') !== 0) {
+            // Es una ruta relativa, construir URL completa basada en la ubicación actual
+            var baseUrl = window.location.origin;
+            if (url.charAt(0) !== '/') {
+                url = baseUrl + '/' + url;
+            } else {
+                url = baseUrl + url;
+            }
+            console.log('Ruta relativa convertida:', item.imagen, '->', url);
+        } else if (url.indexOf('http://') === 0) {
             url = 'https://' + url.substring(7);
         }
+        
         var sep = url.indexOf('?') !== -1 ? '&' : '?';
         url = url + sep + '_t=' + PAGE_LOAD_TIMESTAMP;
         imageCache[key] = url;
