@@ -52,6 +52,31 @@ function getProductImage(item) {
     return null;
 }
 
+function logImageStats() {
+    var withImage = 0;
+    var withoutImage = 0;
+    var sampleImages = [];
+    for (var i = 0; i < menuProducts.length; i++) {
+        var img = getProductImage(menuProducts[i]);
+        if (img) {
+            withImage++;
+            if (sampleImages.length < 5) sampleImages.push(img);
+        } else {
+            withoutImage++;
+        }
+    }
+    console.log('=== ESTADÍSTICAS DE IMÁGENES ===');
+    console.log('Productos con imagen:', withImage);
+    console.log('Productos sin imagen:', withoutImage);
+    console.log('Ejemplos de URLs de imagen:', sampleImages);
+    console.log('Primeros 3 productos:', menuProducts.slice(0, 3).map(p => ({
+        id: p.id,
+        nombre: p.nombre,
+        imagen: p.imagen,
+        imagenProcesada: getProductImage(p)
+    })));
+}
+
 function handleImageError(img) {
     if (img.dataset.retried === 'true') {
         img.style.display = 'none';
@@ -206,6 +231,7 @@ async function loadProducts() {
         renderCategories();
         setTimeout(function() { selectDailyDrink(); }, 100);
         applyFilters();
+        logImageStats();
         hideCinematicOverlay();
 
     } catch (e) {
