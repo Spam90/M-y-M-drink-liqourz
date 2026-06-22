@@ -216,22 +216,21 @@ async function loadProducts() {
     try {
         renderSkeletons(8);
 
-        var res = await fetch('/api/productos', {
+        // Cargar desde JSON estático (compatible con Vercel y GitHub Pages)
+        var res = await fetch('/productos.json', {
             method: 'GET',
             headers: { 'Cache-Control': 'no-cache' }
         });
 
         if (!res.ok) {
-            var errText = await res.text();
-            console.error('HTTP Error:', res.status, errText);
-            throw new Error('HTTP ' + res.status + ': ' + errText);
+            throw new Error('Error al cargar productos.json');
         }
 
         var data = await res.json();
-        console.log('Productos cargados:', data.length, data);
+        console.log('Productos cargados desde JSON:', data.length);
 
         if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('Sin productos en la base de datos');
+            throw new Error('Sin productos en el archivo JSON');
         }
 
         menuProducts = groupProductsWithGlass(data);
@@ -251,7 +250,6 @@ async function loadProducts() {
                 '<i class="fa-solid fa-wifi-slash text-2xl sm:text-3xl block mb-3 sm:mb-4 opacity-30"></i>' +
                 '<p class="text-sm sm:text-base">Error al cargar catálogo</p>' +
                 '<p class="text-xs text-gray-600 mt-2">' + (e.message || 'Error') + '</p>' +
-                '<p class="text-xs text-gray-600 mt-1">Verifica que Supabase tenga productos en la tabla "productos"</p>' +
                 '<button onclick="location.reload()" class="mt-4 bg-gold-400 text-black px-6 py-2 rounded-full font-bold hover:bg-gold-500 transition-all">' +
                 '<i class="fas fa-sync mr-2"></i> Reintentar</button></div>';
         }
