@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
     
     <style>
+        /* ============================================================
+           BOTÓN DE RESCATE
+           ============================================================ */
         #rescue-button {
             position: fixed;
             bottom: 80px;
@@ -24,17 +27,20 @@
             color: black;
             border: none;
             border-radius: 50px;
-            padding: 12px 20px;
+            padding: 10px 16px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             box-shadow: 0 8px 30px rgba(212, 175, 55, 0.4);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s var(--ease-spring);
             display: none;
         }
-        #rescue-button:hover { transform: scale(1.05); }
-        #rescue-button:active { transform: scale(0.95); }
+        #rescue-button:hover { transform: scale(1.08); }
+        #rescue-button:active { transform: scale(0.92); }
         
+        /* ============================================================
+           IMAGEN WRAP
+           ============================================================ */
         .img-wrap {
             position: relative;
             overflow: hidden;
@@ -48,6 +54,10 @@
             background: #1a1a2e !important;
             display: block !important;
         }
+        
+        /* ============================================================
+           NO IMAGE TEXT
+           ============================================================ */
         .no-image-text {
             display: flex;
             flex-direction: column;
@@ -64,8 +74,16 @@
         .no-image-text span { font-size: 28px; margin-bottom: 4px; }
         .no-image-text p { margin: 0; line-height: 1.3; }
         
-        @media (max-width: 767px) { #rescue-button { display: block; } }
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 767px) {
+            #rescue-button { display: block; }
+        }
         
+        /* ============================================================
+           SKELETON
+           ============================================================ */
         .skeleton {
             background: linear-gradient(90deg, #1a1a2e 25%, #2a2a3e 50%, #1a1a2e 75%);
             background-size: 200% 100%;
@@ -79,6 +97,9 @@
             100% { background-position: 200% 0; }
         }
         
+        /* ============================================================
+           BADGE OFERTA
+           ============================================================ */
         .badge-vaso {
             position: absolute;
             top: 10px;
@@ -102,7 +123,9 @@
 </head>
 <body class="bg-brandDark-900 text-white font-sans antialiased">
 
-    <!-- OVERLAY DE CARGA -->
+    <!-- ============================================================
+    CINEMATIC OVERLAY - MÁS PEQUEÑO
+    ============================================================ -->
     <div id="cinematic-overlay">
         <div class="cinematic-content">
             <div class="cinematic-logo">
@@ -117,7 +140,9 @@
         </div>
     </div>
 
-    <!-- HEADER -->
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
     <header class="fixed top-0 left-0 w-full z-50 transition-all duration-500 bg-brandDark-900/70 backdrop-blur-xl border-b border-white/5" id="main-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
             <a href="#" class="flex items-center gap-2 sm:gap-3 group">
@@ -154,7 +179,9 @@
         </div>
     </header>
 
-    <!-- HERO -->
+    <!-- ============================================================
+    HERO
+    ============================================================ -->
     <section class="relative min-h-screen pt-20 sm:pt-28 flex items-center overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute inset-0 bg-gradient-to-b from-brandDark-900 via-transparent to-brandDark-900 z-10"></div>
@@ -226,7 +253,9 @@
         </div>
     </section>
 
-    <!-- CATEGORÍAS -->
+    <!-- ============================================================
+    CATEGORÍAS
+    ============================================================ -->
     <section id="categorias" class="py-12 sm:py-16 border-y border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -246,7 +275,9 @@
         </div>
     </section>
 
-    <!-- CATÁLOGO -->
+    <!-- ============================================================
+    CATÁLOGO
+    ============================================================ -->
     <main id="catalogo" class="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12" data-aos="fade-up" data-aos-duration="500">
             <div>
@@ -270,12 +301,16 @@
         <div id="paginationContainer"></div>
     </main>
 
-    <!-- BOTÓN DE RESCATE -->
+    <!-- ============================================================
+    BOTÓN DE RESCATE
+    ============================================================ -->
     <button id="rescue-button" onclick="window.forceLoadAllImages && window.forceLoadAllImages()">
         🔄 Cargar imágenes
     </button>
 
-    <!-- CARRITO -->
+    <!-- ============================================================
+    CARRITO
+    ============================================================ -->
     <div id="cart-modal" class="fixed inset-0 z-50 pointer-events-none hidden">
         <div onclick="toggleCartModal()" class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-400 pointer-events-auto opacity-0" id="cart-backdrop"></div>
         <div class="absolute right-0 top-0 bottom-0 w-full max-w-sm sm:max-w-md bg-brandDark-800 border-l border-white/5 p-4 sm:p-6 flex flex-col shadow-2xl transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] translate-x-full pointer-events-auto" id="cart-sheet">
@@ -308,7 +343,9 @@
         </div>
     </div>
 
-    <!-- NOMBRE MODAL -->
+    <!-- ============================================================
+    NOMBRE MODAL
+    ============================================================ -->
     <div id="name-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 hidden">
         <div onclick="closeNameModal()" class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity duration-300"></div>
         <div class="bg-brandDark-800 border border-white/5 max-w-sm w-full rounded-2xl sm:rounded-3xl p-5 sm:p-6 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]" id="name-modal-content">
@@ -332,13 +369,17 @@
         </div>
     </div>
 
-    <!-- TOAST -->
+    <!-- ============================================================
+    TOAST
+    ============================================================ -->
     <div id="toast-notification" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-gold-400 to-amber-600 text-black px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full font-bold shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-400 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] pointer-events-none text-xs sm:text-sm">
         <i class="fa-solid fa-circle-check text-base sm:text-lg"></i>
         <span id="toastMessage">¡Añadido!</span>
     </div>
 
-    <!-- FOOTER -->
+    <!-- ============================================================
+    FOOTER
+    ============================================================ -->
     <footer class="bg-brandDark-900 border-t border-white/5 py-8 sm:py-12 text-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-3 sm:space-y-4">
             <div class="flex items-center justify-center gap-2">
@@ -365,7 +406,9 @@
     <script src="assets/js/script.js"></script>
     
     <script>
-        // Script de rescate
+        // ============================================================
+        //  SCRIPT DE RESCATE
+        // ============================================================
         window.forceLoadAllImages = window.forceLoadAllImages || function() {
             var allImages = document.querySelectorAll('.product-card img, .cart-item img, #daily-drink-image');
             allImages.forEach(function(img) {
@@ -383,7 +426,9 @@
             });
         };
 
-        // Monitorear imágenes fallidas en móvil
+        // ============================================================
+        //  MONITOREAR IMÁGENES FALLIDAS
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 var images = document.querySelectorAll('.product-card img');
