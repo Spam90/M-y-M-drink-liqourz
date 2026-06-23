@@ -1,5 +1,16 @@
 // =====================================================
-//  M&M DRINK LIQUOR - VERSIÓN SIMPLE Y DIRECTA
+//  M&M DRINK LIQUOR - CON SUPABASE
+// =====================================================
+
+// =====================================================
+//  CONFIGURACIÓN SUPABASE
+// =====================================================
+
+const SUPABASE_URL = 'https://mflamrkyqjipbbjevfgv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mbGFtcmt5cWppcGJiamV2Zmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMDc2NzgsImV4cCI6MjA5NzU4MzY3OH0.ASKpXVxk5nuaoZqGi5P9TuM55Lurju8BZbdK0fPVUB8';
+
+// =====================================================
+//  VARIABLES GLOBALES
 // =====================================================
 
 var menuProducts = [];
@@ -12,6 +23,36 @@ var imageCache = {};
 var dailyDrink = null;
 var PAGE_LOAD_TIMESTAMP = Date.now();
 var DEFAULT_WHATSAPP = '18294481651';
+var supabaseClient = null;
+var isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+// =====================================================
+//  INICIALIZAR SUPABASE
+// =====================================================
+
+function initSupabase() {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✅ Supabase inicializado');
+        return true;
+    }
+    return false;
+}
+
+// Intentar inicializar
+if (!initSupabase()) {
+    // Esperar a que cargue Supabase
+    var checkInterval = setInterval(function() {
+        if (typeof supabase !== 'undefined') {
+            clearInterval(checkInterval);
+            initSupabase();
+            // Si ya cargamos productos, recargar
+            if (menuProducts.length > 0) {
+                loadProducts();
+            }
+        }
+    }, 500);
+}
 
 // =====================================================
 //  FUNCIÓN PARA OBTENER URL ABSOLUTA
@@ -51,6 +92,10 @@ function getProductImage(item) {
     imageCache[key] = placeholder;
     return placeholder;
 }
+
+// =====================================================
+//  HANDLER DE ERROR DE IMÁGENES
+// =====================================================
 
 function handleImageError(img) {
     if (!img) return;
@@ -105,6 +150,67 @@ function renderSkeletons(count) {
 function formatPrice(val) {
     if (val === null || val === undefined || isNaN(val)) return '0';
     return Number(val).toLocaleString();
+}
+
+// =====================================================
+//  CARGAR PRODUCTOS DESDE SUPABASE
+// =====================================================
+
+async function loadProducts() {
+    try {
+        renderSkeletons(8);
+        console.log('🔄 Cargando productos desde Supabase...');
+
+        if (!supabaseClient) {
+            console.warn('⏳ Esperando conexión a Supabase...');
+            // Esperar un poco y reintentar
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (!supabaseClient) {
+                initSupabase();
+                if (!supabaseClient) {
+                    throw new Error('Supabase no disponible');
+                }
+            }
+        }
+
+        const { data, error } = await supabaseClient
+            .from('productos')
+            .select('*')
+            .order('id', { ascending: true });
+
+        if (error) throw error;
+
+        console.log('📦 Productos cargados desde Supabase:', data ? data.length : 0);
+
+        if (!data || data.length === 0) {
+            throw new Error('No hay productos en la base de datos');
+        }
+
+        menuProducts = groupProductsWithGlass(data);
+        window.menuProducts = menuProducts;
+
+        renderCategories();
+        setTimeout(function() { selectDailyDrink(); }, 100);
+        applyFilters();
+        hideCinematicOverlay();
+
+    } catch (e) {
+        console.error('❌ Error cargando productos:', e);
+        hideCinematicOverlay();
+        var grid = document.getElementById('products-grid');
+        if (grid) {
+            grid.innerHTML = '<div class="col-span-full text-center py-12 sm:py-16 text-gray-500">' +
+                '<i class="fa-solid fa-wifi-slash text-2xl sm:text-3xl block mb-3 sm:mb-4 opacity-30"></i>' +
+                '<p class="text-sm sm:text-base">Error al cargar catálogo</p>' +
+                '<p class="text-xs text-gray-600 mt-2">' + (e.message || 'Error al conectar con Supabase') + '</p>' +
+                '<div class="mt-4 flex flex-wrap justify-center gap-3">' +
+                '<button onclick="location.reload()" class="bg-gold-400 text-black px-6 py-2 rounded-full font-bold hover:bg-gold-500 transition-all">' +
+                '<i class="fas fa-sync mr-2"></i> Reintentar</button>' +
+                '<button onclick="loadProducts()" class="bg-blue-500/20 text-blue-400 px-6 py-2 rounded-full font-bold hover:bg-blue-500/30 transition-all">' +
+                '<i class="fas fa-database mr-2"></i> Conectar a Supabase</button>' +
+                '</div></div>';
+        }
+    }
 }
 
 // =====================================================
@@ -185,53 +291,6 @@ function groupProductsWithGlass(products) {
     }
 
     return normalProducts.concat(groupedArray);
-}
-
-// =====================================================
-//  CARGA DE PRODUCTOS
-// =====================================================
-
-async function loadProducts() {
-    try {
-        renderSkeletons(8);
-
-        var res = await fetch('/productos.json', {
-            method: 'GET',
-            headers: { 'Cache-Control': 'no-cache' }
-        });
-
-        if (!res.ok) {
-            throw new Error('Error al cargar productos.json: ' + res.status);
-        }
-
-        var data = await res.json();
-        console.log('📦 Productos cargados:', data.length);
-
-        if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('Sin productos en el archivo JSON');
-        }
-
-        menuProducts = groupProductsWithGlass(data);
-        window.menuProducts = menuProducts;
-
-        renderCategories();
-        setTimeout(function() { selectDailyDrink(); }, 100);
-        applyFilters();
-        hideCinematicOverlay();
-
-    } catch (e) {
-        console.error('❌ Error:', e);
-        hideCinematicOverlay();
-        var grid = document.getElementById('products-grid');
-        if (grid) {
-            grid.innerHTML = '<div class="col-span-full text-center py-12 sm:py-16 text-gray-500">' +
-                '<i class="fa-solid fa-wifi-slash text-2xl sm:text-3xl block mb-3 sm:mb-4 opacity-30"></i>' +
-                '<p class="text-sm sm:text-base">Error al cargar catálogo</p>' +
-                '<p class="text-xs text-gray-600 mt-2">' + (e.message || 'Error') + '</p>' +
-                '<button onclick="location.reload()" class="mt-4 bg-gold-400 text-black px-6 py-2 rounded-full font-bold hover:bg-gold-500 transition-all">' +
-                '<i class="fas fa-sync mr-2"></i> Reintentar</button></div>';
-        }
-    }
 }
 
 // =====================================================
@@ -384,6 +443,7 @@ function renderProducts(allItems) {
             var delay = Math.min(i * 40, 300);
             var nombreSeguro = escapeHtml(prod.nombre);
             var catSeguro = escapeHtml(prod.categoria);
+            var esOferta = prod.es_oferta === true;
 
             html += '<div class="product-card" data-aos="fade-up" data-aos-duration="500" data-aos-delay="' + delay + '">';
             html += '<div class="img-wrap">';
@@ -393,6 +453,7 @@ function renderProducts(allItems) {
             html += '<div class="no-image-text" style="display:none;"><span>🍷</span><p>No hay imagen<br>disponible</p></div>';
 
             if (tieneVaso) html += '<span class="badge-vaso">🥔 +Vaso</span>';
+            if (esOferta) html += '<span class="badge-vaso" style="background:linear-gradient(135deg,#D4AF37,#B8923F);color:#000;">🔥 Oferta</span>';
 
             html += '</div>';
             html += '<span class="category-tag">' + catSeguro + '</span>';
@@ -727,6 +788,27 @@ function shareCatalog() {
 }
 
 // =====================================================
+//  FUNCIÓN DE RESCATE PARA FORZAR CARGA DE IMÁGENES
+// =====================================================
+
+window.forceLoadAllImages = function() {
+    var allImages = document.querySelectorAll('.product-card img, .cart-item img, #daily-drink-image');
+    allImages.forEach(function(img) {
+        var src = img.getAttribute('src') || img.getAttribute('data-src');
+        if (src && !src.startsWith('data:image')) {
+            var baseUrl = src.split('?')[0];
+            var newSrc = baseUrl + '?_t=' + Date.now() + '&_force=' + Math.random().toString(36).substr(2, 5);
+            img.removeAttribute('data-src');
+            img.src = newSrc;
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Crect width="200" height="200" fill="%231a1a2e"/%3E%3Ctext x="100" y="90" text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="50" fill="%23444"%3E🍷%3C/text%3E%3Ctext x="100" y="125" text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="14" fill="%23555"%3ESin imagen%3C/text%3E%3C/svg%3E';
+                this.onerror = null;
+            };
+        }
+    });
+};
+
+// =====================================================
 //  INICIALIZACIÓN
 // =====================================================
 
@@ -736,7 +818,8 @@ document.addEventListener('DOMContentLoaded', function() {
             duration: 600, 
             easing: 'ease-out-cubic', 
             once: true, 
-            offset: 30
+            offset: 30,
+            disable: isMobile
         });
     }
     
@@ -762,3 +845,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartUI(); 
     }, 150);
 });
+
+// Exponer funciones globalmente
+window.menuProducts = menuProducts;
