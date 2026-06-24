@@ -25,7 +25,6 @@
         .toast.success { background: #22c55e; color: white; }
         .toast.info { background: #3b82f6; color: white; }
         
-        /* Botón Sincronizar en amarillo */
         .btn-sync {
             background: #D4AF37;
             color: black;
@@ -84,13 +83,11 @@
         <!-- ADMIN PANEL -->
         <div id="adminPanel" class="hidden">
             
-            <!-- Estado de conexión -->
             <div id="connectionStatus" class="mb-4 p-3 rounded-xl text-sm flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
                 <i class="fas fa-circle-notch fa-spin"></i>
                 <span>Conectando a Supabase...</span>
             </div>
 
-            <!-- Barra de búsqueda y acciones -->
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div class="flex-1 relative">
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
@@ -102,7 +99,6 @@
                 </button>
             </div>
 
-            <!-- FORMULARIO -->
             <div id="formBox" class="hidden glass p-4 sm:p-6 rounded-2xl mb-4 sm:mb-6 border border-white/5">
                 <div class="flex items-center justify-between mb-4">
                     <h3 id="formTitle" class="font-bold text-base sm:text-lg">Nuevo Producto</h3>
@@ -191,7 +187,6 @@
                 </form>
             </div>
 
-            <!-- TABLA DE PRODUCTOS -->
             <div class="glass rounded-2xl overflow-hidden">
                 <div class="overflow-x-auto" style="max-height: 60vh;">
                     <table class="w-full text-left text-sm">
@@ -216,7 +211,6 @@
 
     </div>
 
-    <!-- TOAST -->
     <div id="toast" class="toast hidden"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
