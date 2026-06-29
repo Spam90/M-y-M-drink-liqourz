@@ -740,6 +740,25 @@ body {
 }
 
 /* ============================================================
+   REDES SOCIALES
+   ============================================================ */
+
+.social-btn {
+    transition: all 0.3s ease;
+}
+.social-btn:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+.social-btn.facebook:hover { color: #1877f2; }
+.social-btn.instagram:hover { color: #e4405f; }
+
+.hover\:text-facebook:hover { color: #1877f2; }
+.hover\:text-instagram:hover { color: #e4405f; }
+.hover\:border-facebook:hover { border-color: #1877f2; }
+.hover\:border-instagram:hover { border-color: #e4405f; }
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 
