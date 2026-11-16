@@ -308,6 +308,21 @@
             </div>
         </div>
 
+        <div class="catalog-controls mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <label class="catalog-sort flex items-center gap-3">
+                <span class="text-xs sm:text-sm text-gray-400 whitespace-nowrap">Ordenar por</span>
+                <select id="sort-select" class="catalog-select">
+                    <option value="default">Recomendados</option>
+                    <option value="price-asc">Precio: menor a mayor</option>
+                    <option value="price-desc">Precio: mayor a menor</option>
+                </select>
+            </label>
+            <label class="available-filter inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="available-only" />
+                <span class="text-xs sm:text-sm text-gray-300">Mostrar solo disponibles</span>
+            </label>
+        </div>
+
         <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 relative min-h-[400px]"></div>
 
         <div id="paginationContainer"></div>
