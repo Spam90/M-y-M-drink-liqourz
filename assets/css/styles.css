@@ -855,3 +855,36 @@ body {
     box-shadow: 0 8px 30px rgba(255, 107, 0, 0.4);
     transform: translateY(-3px) scale(1.06);
 }
+
+
+/* Contador de productos en botones de categoría */
+.cat-btn-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.cat-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.09);
+    color: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.cat-btn-custom.active .cat-count {
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.cat-btn-custom.oferta-cat:not(.active) .cat-count {
+    background: rgba(212, 175, 55, 0.18);
+}
