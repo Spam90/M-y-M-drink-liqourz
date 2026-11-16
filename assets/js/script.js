@@ -238,16 +238,23 @@ function renderCategories() {
     if (!container) return;
 
     var categories = [];
-    var hasOffers = false;
+    var categoryCounts = Object.create(null);
+    var offersCount = 0;
 
     for (var i = 0; i < menuProducts.length; i++) {
         var category = String(menuProducts[i].categoria || '').trim();
-        if (category && categories.indexOf(category) === -1) categories.push(category);
-        if (menuProducts[i].es_oferta == 1) hasOffers = true;
+        if (category) {
+            if (!Object.prototype.hasOwnProperty.call(categoryCounts, category)) {
+                categoryCounts[category] = 0;
+                categories.push(category);
+            }
+            categoryCounts[category]++;
+        }
+        if (menuProducts[i].es_oferta == 1) offersCount++;
     }
 
     var cats = ['all'];
-    if (hasOffers) cats.push('ofertas');
+    if (offersCount > 0) cats.push('ofertas');
     cats = cats.concat(categories);
 
     var fragment = document.createDocumentFragment();
@@ -259,8 +266,19 @@ function renderCategories() {
             (cat === currentCategory ? ' active' : '') +
             (cat === 'ofertas' ? ' oferta-cat' : '');
         button.dataset.cat = cat;
-        button.textContent = cat === 'all' ? '⭐ Todos' :
+
+        var label = document.createElement('span');
+        label.className = 'cat-label';
+        label.textContent = cat === 'all' ? '⭐ Todos' :
             (cat === 'ofertas' ? '🔥 Ofertas' : cat);
+
+        var count = document.createElement('span');
+        count.className = 'cat-count';
+        count.textContent = cat === 'all' ? menuProducts.length :
+            (cat === 'ofertas' ? offersCount : categoryCounts[cat]);
+
+        button.appendChild(label);
+        button.appendChild(count);
         button.addEventListener('click', function() {
             filterCategory(this.dataset.cat);
         });
