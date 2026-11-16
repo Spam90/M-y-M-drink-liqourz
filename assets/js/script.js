@@ -544,6 +544,18 @@ function confirmSendOrder() {
         showToast('⚠️ El carrito está vacío');
         return;
     }
+
+    for (var stockIndex = 0; stockIndex < cart.length; stockIndex++) {
+        var cartItem = cart[stockIndex];
+        var currentProduct = menuProducts.find(function(product) {
+            return Number(product.id) === Number(cartItem.id);
+        });
+        if (!currentProduct || Number(currentProduct.disponible) === 0) {
+            showToast('⚠️ "' + String(cartItem.nombre || 'Un producto') + '" ya no está disponible. Actualiza tu carrito.');
+            return;
+        }
+    }
+
     var message = '*NUEVO PEDIDO - M&M DRINK LIQUOR*\n';
     message += '-------------------------------------------\n';
     message += '*Cliente:* ' + name + '\n';
