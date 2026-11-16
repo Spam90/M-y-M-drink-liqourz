@@ -890,12 +890,12 @@ body {
 }
 
 
-/* Controles del catálogo: estética oscura y dorada de M&M */
+/* Controles del catálogo: integrados con los campos y botones del sitio */
 .catalog-controls {
-    padding: 12px 14px;
-    border: 1px solid rgba(212, 175, 55, 0.12);
-    border-radius: 16px;
-    background: linear-gradient(110deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 .catalog-sort {
@@ -903,11 +903,11 @@ body {
 }
 
 .catalog-sort > span {
-    color: #a7a7ad;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: normal;
+    text-transform: none;
 }
 
 .catalog-select {
@@ -916,56 +916,56 @@ body {
     appearance: none;
     -webkit-appearance: none;
     padding: 10px 38px 10px 14px;
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    border-radius: 999px;
-    background-color: rgba(8, 8, 10, 0.82);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A050' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
-    color: #f4e7bd;
-    font-size: 12px;
-    font-weight: 600;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
     outline: none;
     cursor: pointer;
-    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .catalog-select:hover {
-    border-color: rgba(212, 175, 55, 0.65);
-    background-color: rgba(20, 18, 12, 0.95);
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .catalog-select:focus {
-    border-color: #D4AF37;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.13);
+    border-color: #C9A050;
+    box-shadow: 0 0 0 1px rgba(201, 160, 80, 0.25);
 }
 
 .catalog-select option {
     background: #111115;
-    color: #f3f3f3;
+    color: #fff;
 }
 
 .available-filter {
-    color: #c5c5ca;
-    font-size: 12px;
+    color: #d1d5db;
+    font-size: 13px;
     transition: color 0.2s ease;
 }
 
 .available-filter:hover {
-    color: #f4e7bd;
+    color: #fff;
 }
 
 .available-filter input {
     width: 16px;
     height: 16px;
     margin: 0;
-    accent-color: #D4AF37;
+    accent-color: #C9A050;
     cursor: pointer;
 }
 
 @media (max-width: 640px) {
     .catalog-controls {
-        padding: 12px;
         gap: 12px;
     }
     .catalog-sort {
