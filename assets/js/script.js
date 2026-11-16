@@ -236,34 +236,40 @@ function renderDailyDrink() {
 function renderCategories() {
     var container = document.getElementById('categories-scroll');
     if (!container) return;
-    var catSet = {};
-    var tieneOfertas = false;
+
+    var categories = [];
+    var hasOffers = false;
+
     for (var i = 0; i < menuProducts.length; i++) {
-        var c = menuProducts[i].categoria;
-        if (c) catSet[c] = true;
-        if (menuProducts[i].es_oferta == 1) {
-            tieneOfertas = true;
-        }
+        var category = String(menuProducts[i].categoria || '').trim();
+        if (category && categories.indexOf(category) === -1) categories.push(category);
+        if (menuProducts[i].es_oferta == 1) hasOffers = true;
     }
+
     var cats = ['all'];
-    if (tieneOfertas) {
-        cats.push('ofertas');
-    }
-    for (var key in catSet) {
-        if (catSet.hasOwnProperty(key)) cats.push(key);
-    }
-    var html = '';
+    if (hasOffers) cats.push('ofertas');
+    cats = cats.concat(categories);
+
+    var fragment = document.createDocumentFragment();
     for (var j = 0; j < cats.length; j++) {
         var cat = cats[j];
-        var label = cat === 'all' ? '⭐ Todos' : (cat === 'ofertas' ? '🔥 Ofertas' : cat);
-        var isActive = cat === currentCategory;
-        var extraClass = cat === 'ofertas' ? ' oferta-cat' : '';
-        html += '<button onclick="filterCategory(\'' + cat.replace(/'/g, "\\'") + '\')" class="cat-btn-custom' + (isActive ? ' active' : '') + extraClass + '" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(label) + '</button>';
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'cat-btn-custom' +
+            (cat === currentCategory ? ' active' : '') +
+            (cat === 'ofertas' ? ' oferta-cat' : '');
+        button.dataset.cat = cat;
+        button.textContent = cat === 'all' ? '⭐ Todos' :
+            (cat === 'ofertas' ? '🔥 Ofertas' : cat);
+        button.addEventListener('click', function() {
+            filterCategory(this.dataset.cat);
+        });
+        fragment.appendChild(button);
     }
-    container.innerHTML = html;
+
+    container.replaceChildren(fragment);
     setupCategoryNavigation();
 }
-
 function setupCategoryNavigation() {
     var prevBtn = document.getElementById('cat-prev');
     var nextBtn = document.getElementById('cat-next');
@@ -294,7 +300,7 @@ function applyFilters() {
         }
         if (searchQuery) {
             var q = searchQuery.toLowerCase();
-            if (p.nombre.toLowerCase().indexOf(q) === -1 && p.categoria.toLowerCase().indexOf(q) === -1) continue;
+            if (String(p.nombre || '').toLowerCase().indexOf(q) === -1 && String(p.categoria || '').toLowerCase().indexOf(q) === -1) continue;
         }
         filtered.push(p);
     }
@@ -552,13 +558,19 @@ function confirmSendOrder() {
     message += '-------------------------------------------\n';
     message += '_Para confirmar disponibilidad y envío._';
     var url = 'https://wa.me/' + DEFAULT_WHATSAPP + '?text=' + encodeURIComponent(message);
+    var whatsappWindow = window.open(url, '_blank');
+
+    if (!whatsappWindow) {
+        showToast('⚠️ No se pudo abrir WhatsApp. Permite las ventanas emergentes e inténtalo de nuevo.');
+        return;
+    }
+
     cart = [];
     saveCartData();
     updateCartUI();
     closeNameModal();
     toggleCartModal();
-    window.open(url, '_blank');
-    showToast('✅ Pedido enviado');
+    showToast('✅ Pedido preparado para enviar por WhatsApp');
 }
 
 function openNameModal() {
