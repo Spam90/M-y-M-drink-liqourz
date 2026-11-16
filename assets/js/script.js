@@ -13,6 +13,8 @@ var menuProducts = [];
 var currentCategory = 'all';
 var currentPage = 1;
 var searchQuery = '';
+var sortOrder = 'default';
+var showAvailableOnly = false;
 var itemsPerPage = 12;
 var cart = [];
 var imageCache = {};
@@ -307,8 +309,19 @@ function filterCategory(cat) {
     applyFilters();
 }
 
+function normalizeSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\\s+/g, ' ');
+}
+
 function applyFilters() {
     var filtered = [];
+    var normalizedQuery = normalizeSearchText(searchQuery);
+
     for (var i = 0; i < menuProducts.length; i++) {
         var p = menuProducts[i];
         if (currentCategory === 'ofertas') {
@@ -316,12 +329,28 @@ function applyFilters() {
         } else if (currentCategory !== 'all' && p.categoria !== currentCategory) {
             continue;
         }
-        if (searchQuery) {
-            var q = searchQuery.toLowerCase();
-            if (String(p.nombre || '').toLowerCase().indexOf(q) === -1 && String(p.categoria || '').toLowerCase().indexOf(q) === -1) continue;
+
+        if (showAvailableOnly && Number(p.disponible) === 0) continue;
+
+        if (normalizedQuery) {
+            var productName = normalizeSearchText(p.nombre);
+            var productCategory = normalizeSearchText(p.categoria);
+            if (productName.indexOf(normalizedQuery) === -1 &&
+                productCategory.indexOf(normalizedQuery) === -1) continue;
         }
         filtered.push(p);
     }
+
+    if (sortOrder === 'price-asc') {
+        filtered.sort(function(a, b) {
+            return Number(a.precio || 0) - Number(b.precio || 0);
+        });
+    } else if (sortOrder === 'price-desc') {
+        filtered.sort(function(a, b) {
+            return Number(b.precio || 0) - Number(a.precio || 0);
+        });
+    }
+
     renderProducts(filtered);
 }
 
@@ -710,6 +739,25 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
     var searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.addEventListener('input', handleSearch);
+
+    var sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            sortOrder = sortSelect.value;
+            currentPage = 1;
+            applyFilters();
+        });
+    }
+
+    var availableOnlyInput = document.getElementById('available-only');
+    if (availableOnlyInput) {
+        availableOnlyInput.addEventListener('change', function() {
+            showAvailableOnly = availableOnlyInput.checked;
+            currentPage = 1;
+            applyFilters();
+        });
+    }
+
     window.addEventListener('scroll', handleHeaderScroll, { passive: true });
     try {
         var saved = localStorage.getItem('mymCart_v2');
