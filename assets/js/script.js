@@ -236,34 +236,40 @@ function renderDailyDrink() {
 function renderCategories() {
     var container = document.getElementById('categories-scroll');
     if (!container) return;
-    var catSet = {};
-    var tieneOfertas = false;
+
+    var categories = [];
+    var hasOffers = false;
+
     for (var i = 0; i < menuProducts.length; i++) {
-        var c = menuProducts[i].categoria;
-        if (c) catSet[c] = true;
-        if (menuProducts[i].es_oferta == 1) {
-            tieneOfertas = true;
-        }
+        var category = String(menuProducts[i].categoria || '').trim();
+        if (category && categories.indexOf(category) === -1) categories.push(category);
+        if (menuProducts[i].es_oferta == 1) hasOffers = true;
     }
+
     var cats = ['all'];
-    if (tieneOfertas) {
-        cats.push('ofertas');
-    }
-    for (var key in catSet) {
-        if (catSet.hasOwnProperty(key)) cats.push(key);
-    }
-    var html = '';
+    if (hasOffers) cats.push('ofertas');
+    cats = cats.concat(categories);
+
+    var fragment = document.createDocumentFragment();
     for (var j = 0; j < cats.length; j++) {
         var cat = cats[j];
-        var label = cat === 'all' ? '⭐ Todos' : (cat === 'ofertas' ? '🔥 Ofertas' : cat);
-        var isActive = cat === currentCategory;
-        var extraClass = cat === 'ofertas' ? ' oferta-cat' : '';
-        html += '<button onclick="filterCategory(\'' + cat.replace(/'/g, "\\'") + '\')" class="cat-btn-custom' + (isActive ? ' active' : '') + extraClass + '" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(label) + '</button>';
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'cat-btn-custom' +
+            (cat === currentCategory ? ' active' : '') +
+            (cat === 'ofertas' ? ' oferta-cat' : '');
+        button.dataset.cat = cat;
+        button.textContent = cat === 'all' ? '⭐ Todos' :
+            (cat === 'ofertas' ? '🔥 Ofertas' : cat);
+        button.addEventListener('click', function() {
+            filterCategory(this.dataset.cat);
+        });
+        fragment.appendChild(button);
     }
-    container.innerHTML = html;
+
+    container.replaceChildren(fragment);
     setupCategoryNavigation();
 }
-
 function setupCategoryNavigation() {
     var prevBtn = document.getElementById('cat-prev');
     var nextBtn = document.getElementById('cat-next');
@@ -294,7 +300,7 @@ function applyFilters() {
         }
         if (searchQuery) {
             var q = searchQuery.toLowerCase();
-            if (p.nombre.toLowerCase().indexOf(q) === -1 && p.categoria.toLowerCase().indexOf(q) === -1) continue;
+            if (String(p.nombre || '').toLowerCase().indexOf(q) === -1 && String(p.categoria || '').toLowerCase().indexOf(q) === -1) continue;
         }
         filtered.push(p);
     }
@@ -322,15 +328,17 @@ function renderProducts(allItems) {
             var nombreSeguro = escapeHtml(prod.nombre);
             var catSeguro = escapeHtml(prod.categoria);
             var esOferta = prod.es_oferta == 1;
+            var isAvailable = Number(prod.disponible) !== 0;
             html += '<div class="product-card" data-aos="fade-up" data-aos-duration="500" data-aos-delay="' + delay + '">';
             html += '<div class="img-wrap">';
-            html += '<img src="' + img + '" alt="' + nombreSeguro + '" onerror="handleImageError(this)" style="min-height:120px;width:100%;background:#1a1a2e;display:block;" />';
+            html += '<img src="' + escapeHtml(img) + '" alt="' + nombreSeguro + '" onerror="handleImageError(this)" style="min-height:120px;width:100%;background:#1a1a2e;display:block;" />';
             html += '<div class="no-image-text" style="display:none;"><span>🍷</span><p>No hay imagen<br>disponible</p></div>';
             if (esOferta) html += '<span class="badge-vaso oferta">🔥 Oferta</span>';
+            if (!isAvailable) html += '<span class="badge-vaso" style="background:#991b1b;color:#fff;">Agotado</span>';
             html += '</div>';
             html += '<span class="category-tag">' + catSeguro + '</span>';
             html += '<h4 class="product-name">' + nombreSeguro + '</h4>';
-            html += '<div class="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5"><span class="price">RD$ ' + formatPrice(prod.precio) + '</span><button onclick="addToCart(' + prod.id + ')" class="add-btn"><i class="fa-solid fa-plus text-xs sm:text-sm"></i></button></div>';
+            html += '<div class="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5"><span class="price">RD$ ' + formatPrice(prod.precio) + '</span><button onclick="addToCart(' + Number(prod.id) + ')" class="add-btn"' + (isAvailable ? '' : ' disabled aria-label="Producto agotado" style="opacity:.4;cursor:not-allowed;"') + '><i class="fa-solid fa-plus text-xs sm:text-sm"></i></button></div>';
             html += '</div>';
         }
         grid.innerHTML = html;
@@ -398,6 +406,10 @@ function addToCart(id) {
         if (menuProducts[i].id === Number(id)) { item = menuProducts[i]; break; }
     }
     if (!item) return;
+    if (Number(item.disponible) === 0) {
+        showToast('Este producto está agotado');
+        return;
+    }
     var existing = null;
     for (var j = 0; j < cart.length; j++) {
         if (cart[j].id === Number(id)) { existing = cart[j]; break; }
@@ -454,7 +466,7 @@ function updateCartUI() {
             var img = getProductImage(item);
             var nombreSeguro = escapeHtml(item.nombre);
             html += '<div class="cart-item flex items-center space-x-3 sm:space-x-4 bg-white/[0.02] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-white/[0.04]" style="animation-delay: ' + (j * 40) + 'ms">';
-            html += '<img src="' + img + '" alt="' + nombreSeguro + '" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl object-cover" onerror="handleCartImageError(this)" />';
+            html += '<img src="' + escapeHtml(img) + '" alt="' + nombreSeguro + '" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl object-cover" onerror="handleCartImageError(this)" />';
             html += '<div class="flex-1 min-w-0"><h5 class="text-xs sm:text-sm font-bold text-white truncate">' + nombreSeguro + '</h5><p class="text-[10px] sm:text-xs text-gold-400">RD$ ' + formatPrice(item.precio) + ' x ' + item.quantity + '</p></div>';
             html += '<div class="flex items-center space-x-1 sm:space-x-2">';
             html += '<button onclick="updateCartQuantity(' + item.id + ', -1)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/5 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 text-xs sm:text-sm">−</button>';
@@ -532,6 +544,18 @@ function confirmSendOrder() {
         showToast('⚠️ El carrito está vacío');
         return;
     }
+
+    for (var stockIndex = 0; stockIndex < cart.length; stockIndex++) {
+        var cartItem = cart[stockIndex];
+        var currentProduct = menuProducts.find(function(product) {
+            return Number(product.id) === Number(cartItem.id);
+        });
+        if (!currentProduct || Number(currentProduct.disponible) === 0) {
+            showToast('⚠️ "' + String(cartItem.nombre || 'Un producto') + '" ya no está disponible. Actualiza tu carrito.');
+            return;
+        }
+    }
+
     var message = '*NUEVO PEDIDO - M&M DRINK LIQUOR*\n';
     message += '-------------------------------------------\n';
     message += '*Cliente:* ' + name + '\n';
@@ -552,13 +576,19 @@ function confirmSendOrder() {
     message += '-------------------------------------------\n';
     message += '_Para confirmar disponibilidad y envío._';
     var url = 'https://wa.me/' + DEFAULT_WHATSAPP + '?text=' + encodeURIComponent(message);
+    var whatsappWindow = window.open(url, '_blank');
+
+    if (!whatsappWindow) {
+        showToast('⚠️ No se pudo abrir WhatsApp. Permite las ventanas emergentes e inténtalo de nuevo.');
+        return;
+    }
+
     cart = [];
     saveCartData();
     updateCartUI();
     closeNameModal();
     toggleCartModal();
-    window.open(url, '_blank');
-    showToast('✅ Pedido enviado');
+    showToast('✅ Pedido preparado para enviar por WhatsApp');
 }
 
 function openNameModal() {
