@@ -279,6 +279,24 @@
             }, 4000);
         }
         
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char];
+            });
+        }
+
+        function getSafeImageUrl(value) {
+            const url = String(value || '').trim();
+            if (/^(https?:\/\/|\/|assets\/)/i.test(url)) return url;
+            return 'https://placehold.co/100?text=Sin+Imagen';
+        }
+
         // ============================================================
         //  LOGIN
         // ============================================================
@@ -386,10 +404,10 @@
                     <td class="px-3 py-3">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-dark-800 flex-shrink-0 border border-white/5 overflow-hidden">
-                                <img src="${p.imagen || 'https://placehold.co/100?text=Sin+Imagen'}" class="w-full h-full object-contain p-1" onerror="this.src='https://placehold.co/100?text=Error'">
+                                <img src="${escapeHtml(getSafeImageUrl(p.imagen))}" class="w-full h-full object-contain p-1" onerror="this.src='https://placehold.co/100?text=Error'">
                             </div>
                             <div>
-                                <div class="font-bold text-sm text-white line-clamp-1">${p.nombre}</div>
+                                <div class="font-bold text-sm text-white line-clamp-1">${escapeHtml(p.nombre)}</div>
                                 <div class="text-[10px] flex gap-2 mt-0.5">
                                     ${p.disponible != 0 ? '<span class="text-green-500">En Stock</span>' : '<span class="text-red-500">Agotado</span>'}
                                     ${p.es_oferta == 1 ? '<span class="text-gold-400">🔥 Oferta</span>' : ''}
@@ -397,14 +415,14 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-3 py-3 text-gray-400 text-sm hidden sm:table-cell">${p.categoria || 'Otros'}</td>
+                    <td class="px-3 py-3 text-gray-400 text-sm hidden sm:table-cell">${escapeHtml(p.categoria || 'Otros')}</td>
                     <td class="px-3 py-3 font-bold text-gold-400 text-sm">RD$ ${(p.precio || 0).toLocaleString()}</td>
                     <td class="px-3 py-3 text-right">
                         <div class="flex justify-end gap-2">
-                            <button onclick="editProduct(${p.id})" class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all">
+                            <button onclick="editProduct(${Number(p.id)})" class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all">
                                 <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button onclick="deleteProduct(${p.id})" class="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
+                            <button onclick="deleteProduct(${Number(p.id)})" class="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
                                 <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
@@ -419,17 +437,22 @@
         
         function updateCategories() {
             const select = document.getElementById('prodCategoria');
-            const categories = [...new Set(products.map(p => p.categoria).filter(Boolean))].sort();
+            const categories = [...new Set(products.map(p => String(p.categoria || '').trim()).filter(Boolean))].sort();
             const currentVal = select.value;
-            
             const defaultOptions = ['Ron', 'Whisky', 'Vodka', 'Tequila', 'Ginebra', 'Licor', 'Cerveza', 'Vino', 'Champagne', 'Refresco', 'Agua', 'Energética', 'Otros'];
             const allCategories = [...new Set([...categories, ...defaultOptions])].sort();
-            
-            select.innerHTML = allCategories.map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            if (categories.includes(currentVal)) select.value = currentVal;
+
+            select.replaceChildren();
+            allCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                select.appendChild(option);
+            });
+
+            if (allCategories.includes(currentVal)) select.value = currentVal;
         }
-        
+
         // ============================================================
         //  FORMULARIO
         // ============================================================
