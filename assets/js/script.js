@@ -328,15 +328,17 @@ function renderProducts(allItems) {
             var nombreSeguro = escapeHtml(prod.nombre);
             var catSeguro = escapeHtml(prod.categoria);
             var esOferta = prod.es_oferta == 1;
+            var isAvailable = Number(prod.disponible) !== 0;
             html += '<div class="product-card" data-aos="fade-up" data-aos-duration="500" data-aos-delay="' + delay + '">';
             html += '<div class="img-wrap">';
-            html += '<img src="' + img + '" alt="' + nombreSeguro + '" onerror="handleImageError(this)" style="min-height:120px;width:100%;background:#1a1a2e;display:block;" />';
+            html += '<img src="' + escapeHtml(img) + '" alt="' + nombreSeguro + '" onerror="handleImageError(this)" style="min-height:120px;width:100%;background:#1a1a2e;display:block;" />';
             html += '<div class="no-image-text" style="display:none;"><span>🍷</span><p>No hay imagen<br>disponible</p></div>';
             if (esOferta) html += '<span class="badge-vaso oferta">🔥 Oferta</span>';
+            if (!isAvailable) html += '<span class="badge-vaso" style="background:#991b1b;color:#fff;">Agotado</span>';
             html += '</div>';
             html += '<span class="category-tag">' + catSeguro + '</span>';
             html += '<h4 class="product-name">' + nombreSeguro + '</h4>';
-            html += '<div class="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5"><span class="price">RD$ ' + formatPrice(prod.precio) + '</span><button onclick="addToCart(' + prod.id + ')" class="add-btn"><i class="fa-solid fa-plus text-xs sm:text-sm"></i></button></div>';
+            html += '<div class="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5"><span class="price">RD$ ' + formatPrice(prod.precio) + '</span><button onclick="addToCart(' + Number(prod.id) + ')" class="add-btn"' + (isAvailable ? '' : ' disabled aria-label="Producto agotado" style="opacity:.4;cursor:not-allowed;"') + '><i class="fa-solid fa-plus text-xs sm:text-sm"></i></button></div>';
             html += '</div>';
         }
         grid.innerHTML = html;
@@ -404,6 +406,10 @@ function addToCart(id) {
         if (menuProducts[i].id === Number(id)) { item = menuProducts[i]; break; }
     }
     if (!item) return;
+    if (Number(item.disponible) === 0) {
+        showToast('Este producto está agotado');
+        return;
+    }
     var existing = null;
     for (var j = 0; j < cart.length; j++) {
         if (cart[j].id === Number(id)) { existing = cart[j]; break; }
@@ -460,7 +466,7 @@ function updateCartUI() {
             var img = getProductImage(item);
             var nombreSeguro = escapeHtml(item.nombre);
             html += '<div class="cart-item flex items-center space-x-3 sm:space-x-4 bg-white/[0.02] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-white/[0.04]" style="animation-delay: ' + (j * 40) + 'ms">';
-            html += '<img src="' + img + '" alt="' + nombreSeguro + '" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl object-cover" onerror="handleCartImageError(this)" />';
+            html += '<img src="' + escapeHtml(img) + '" alt="' + nombreSeguro + '" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl object-cover" onerror="handleCartImageError(this)" />';
             html += '<div class="flex-1 min-w-0"><h5 class="text-xs sm:text-sm font-bold text-white truncate">' + nombreSeguro + '</h5><p class="text-[10px] sm:text-xs text-gold-400">RD$ ' + formatPrice(item.precio) + ' x ' + item.quantity + '</p></div>';
             html += '<div class="flex items-center space-x-1 sm:space-x-2">';
             html += '<button onclick="updateCartQuantity(' + item.id + ', -1)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/5 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 text-xs sm:text-sm">−</button>';
